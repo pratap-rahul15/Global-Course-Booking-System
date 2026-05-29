@@ -1,8 +1,8 @@
 package com.undoo.booking.exceptions;
 
-import com.undoo.booking.services.BookingConflictException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import com.undoo.booking.exceptions.BookingConflictException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -22,6 +22,15 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleValidation(
+            IllegalArgumentException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(ex.getMessage());
     }
 }

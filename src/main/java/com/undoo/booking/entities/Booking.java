@@ -8,6 +8,12 @@ import java.time.Instant;
 @Entity
 @Table(
         name = "bookings",
+        indexes = {
+                @Index(
+                        name = "idx_booking_parent",
+                        columnList = "parent_id"
+                )
+        },
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "uk_parent_offering",

@@ -2,6 +2,8 @@ package com.undoo.booking.implementations;
 
 import com.undoo.booking.dtos.BookOfferingRequest;
 import com.undoo.booking.dtos.BookingResponse;
+import com.undoo.booking.dtos.ParentBookingResponse;
+import com.undoo.booking.dtos.ParentSessionInfo;
 import com.undoo.booking.entities.*;
 import com.undoo.booking.exceptions.BookingConflictException;
 import com.undoo.booking.exceptions.ResourceNotFoundException;
@@ -13,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -101,5 +106,65 @@ public class BookingServiceImpl implements BookingService {
                 &&
                 newSession.getEndTimeUtc()
                         .isAfter(existingSession.getStartTimeUtc());
+    }
+
+    @Override
+    public List<ParentBookingResponse> getBookings(Long parentId) {
+
+        Parent parent = parentRepository.findById(parentId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Parent not found"));
+
+        ZoneId parentZone =
+                ZoneId.of(parent.getTimezone());
+
+        DateTimeFormatter formatter =
+                DateTimeFormatter.ofPattern(
+                        "yyyy-MM-dd HH:mm");
+
+        List<Booking> bookings =
+                bookingRepository.findByParentId(parentId);
+
+        return bookings.stream()
+                .map(booking -> {
+
+                    Offering offering =
+                            booking.getOffering();
+
+                    List<ParentSessionInfo> sessions =
+                            sessionRepository
+                                    .findByOfferingIdOrderBySessionOrder(
+                                            offering.getId())
+                                    .stream()
+                                    .map(session -> {
+
+                                        String start =
+                                                session.getStartTimeUtc()
+                                                        .atZone(parentZone)
+                                                        .format(formatter);
+
+                                        String end =
+                                                session.getEndTimeUtc()
+                                                        .atZone(parentZone)
+                                                        .format(formatter);
+
+                                        return ParentSessionInfo.builder()
+                                                .sessionOrder(
+                                                        session.getSessionOrder())
+                                                .startTime(start)
+                                                .endTime(end)
+                                                .build();
+                                    })
+                                    .toList();
+
+                    return ParentBookingResponse.builder()
+                            .bookingId(booking.getId())
+                            .offeringTitle(offering.getTitle())
+                            .courseName(
+                                    offering.getCourse().getName())
+                            .sessions(sessions)
+                            .build();
+                })
+                .toList();
     }
 }

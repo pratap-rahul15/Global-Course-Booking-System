@@ -8,6 +8,7 @@ import com.undoo.booking.repositories.*;
 import com.undoo.booking.services.OfferingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.time.*;
@@ -54,6 +55,7 @@ public class OfferingServiceImpl implements OfferingService {
                 .build();
     }
 
+    @Transactional
     @Override
     public List<Long> addSessions(Long offeringId,
                                   AddSessionsRequest request) {
@@ -73,6 +75,11 @@ public class OfferingServiceImpl implements OfferingService {
 
             LocalDateTime endLocal =
                     LocalDateTime.parse(sessionRequest.getEndTime());
+
+            if (!endLocal.isAfter(startLocal)) {
+                throw new IllegalArgumentException(
+                        "End time must be after the start time");
+            }
 
             Instant startUtc =
                     startLocal.atZone(teacherZone).toInstant();
