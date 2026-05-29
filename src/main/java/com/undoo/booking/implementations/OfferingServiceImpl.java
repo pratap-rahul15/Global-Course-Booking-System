@@ -4,6 +4,7 @@ import com.undoo.booking.dtos.AddSessionsRequest;
 import com.undoo.booking.dtos.CreateOfferingRequest;
 import com.undoo.booking.dtos.OfferingResponse;
 import com.undoo.booking.entities.*;
+import com.undoo.booking.exceptions.ResourceNotFoundException;
 import com.undoo.booking.repositories.*;
 
 import com.undoo.booking.services.OfferingService;
@@ -23,7 +24,29 @@ public class OfferingServiceImpl implements OfferingService {
 
     @Override
     public OfferingResponse createOffering(CreateOfferingRequest request) {
-        return null;
+
+        Teacher teacher = teacherRepository.findById(request.getTeacherId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Teacher not found"));
+
+        Course course = courseRepository.findById(request.getCourseId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Course not found"));
+
+        Offering offering = Offering.builder()
+                .title(request.getTitle())
+                .teacher(teacher)
+                .course(course)
+                .build();
+
+        Offering savedOffering = offeringRepository.save(offering);
+
+        return OfferingResponse.builder()
+                .offeringId(savedOffering.getId())
+                .title(savedOffering.getTitle())
+                .teacherName(teacher.getName())
+                .courseName(course.getName())
+                .build();
     }
 
     @Override
