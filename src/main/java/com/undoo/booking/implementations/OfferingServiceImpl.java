@@ -13,6 +13,10 @@ import java.util.List;
 import java.time.*;
 import java.util.ArrayList;
 
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
+
 @Service
 @RequiredArgsConstructor
 public class OfferingServiceImpl implements OfferingService {
@@ -21,6 +25,7 @@ public class OfferingServiceImpl implements OfferingService {
     private final TeacherRepository teacherRepository;
     private final CourseRepository courseRepository;
     private final SessionRepository sessionRepository;
+    private final ParentRepository parentRepository;
 
     @Override
     public OfferingResponse createOffering(CreateOfferingRequest request) {
@@ -94,4 +99,61 @@ public class OfferingServiceImpl implements OfferingService {
     public List<TeacherOfferingResponse> getTeacherOfferings(Long teacherId) {
         return null;
     }
+
+    @Override
+    public List<ParentOfferingResponse> getAvailableOfferings(Long parentId) {
+
+        Parent parent = parentRepository.findById(parentId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Parent not found"));
+
+        ZoneId parentZone =
+                ZoneId.of(parent.getTimezone());
+
+        DateTimeFormatter formatter =
+                DateTimeFormatter.ofPattern(
+                        "yyyy-MM-dd HH:mm");
+
+        return offeringRepository.findAll()
+                .stream()
+                .map(offering -> {
+
+                    List<ParentSessionInfo> sessions =
+                            sessionRepository
+                                    .findByOfferingIdOrderBySessionOrder(
+                                            offering.getId())
+                                    .stream()
+                                    .map(session -> {
+
+                                        String start =
+                                                session.getStartTimeUtc()
+                                                        .atZone(parentZone)
+                                                        .format(formatter);
+
+                                        String end =
+                                                session.getEndTimeUtc()
+                                                        .atZone(parentZone)
+                                                        .format(formatter);
+
+                                        return ParentSessionInfo.builder()
+                                                .sessionOrder(
+                                                        session.getSessionOrder())
+                                                .startTime(start)
+                                                .endTime(end)
+                                                .build();
+                                    })
+                                    .toList();
+
+                    return ParentOfferingResponse.builder()
+                            .offeringId(offering.getId())
+                            .title(offering.getTitle())
+                            .courseName(
+                                    offering.getCourse().getName())
+                            .sessions(sessions)
+                            .build();
+                })
+                .toList();
+    }
+
+
 }

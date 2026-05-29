@@ -1,9 +1,6 @@
 package com.undoo.booking.services;
 
-import com.undoo.booking.dtos.AddSessionsRequest;
-import com.undoo.booking.dtos.CreateOfferingRequest;
-import com.undoo.booking.dtos.OfferingResponse;
-import com.undoo.booking.dtos.TeacherOfferingResponse;
+import com.undoo.booking.dtos.*;
 
 import java.util.List;
 
@@ -15,4 +12,7 @@ public interface OfferingService {
                            AddSessionsRequest request);
 
     List<TeacherOfferingResponse> getTeacherOfferings(Long teacherId);
+
+
+    List<ParentOfferingResponse> getAvailableOfferings(Long parentId);
 }
