@@ -3,6 +3,7 @@ package com.undoo.booking.services;
 import com.undoo.booking.dtos.AddSessionsRequest;
 import com.undoo.booking.dtos.CreateOfferingRequest;
 import com.undoo.booking.dtos.OfferingResponse;
+import com.undoo.booking.dtos.TeacherOfferingResponse;
 
 import java.util.List;
 
@@ -10,7 +11,8 @@ public interface OfferingService {
 
     OfferingResponse createOffering(CreateOfferingRequest request);
 
-    void addSessions(Long offeringId, AddSessionsRequest request);
+    List<Long> addSessions(Long offeringId,
+                           AddSessionsRequest request);
 
-    List<OfferingResponse> getTeacherOfferings(Long teacherId);
+    List<TeacherOfferingResponse> getTeacherOfferings(Long teacherId);
 }

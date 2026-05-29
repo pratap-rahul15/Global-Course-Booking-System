@@ -3,6 +3,7 @@ package com.undoo.booking.implementations;
 import com.undoo.booking.dtos.AddSessionsRequest;
 import com.undoo.booking.dtos.CreateOfferingRequest;
 import com.undoo.booking.dtos.OfferingResponse;
+import com.undoo.booking.dtos.SessionRequest;
 import com.undoo.booking.entities.*;
 import com.undoo.booking.exceptions.ResourceNotFoundException;
 import com.undoo.booking.repositories.*;
@@ -12,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.time.*;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -50,8 +53,44 @@ public class OfferingServiceImpl implements OfferingService {
     }
 
     @Override
-    public void addSessions(Long offeringId, AddSessionsRequest request) {
+    public List<Long> addSessions(Long offeringId,
+                                  AddSessionsRequest request) {
 
+        Offering offering = offeringRepository.findById(offeringId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Offering not found"));
+
+        ZoneId teacherZone = ZoneId.of(request.getTimezone());
+
+        List<Long> sessionIds = new ArrayList<>();
+
+        for (SessionRequest sessionRequest : request.getSessions()) {
+
+            LocalDateTime startLocal =
+                    LocalDateTime.parse(sessionRequest.getStartTime());
+
+            LocalDateTime endLocal =
+                    LocalDateTime.parse(sessionRequest.getEndTime());
+
+            Instant startUtc =
+                    startLocal.atZone(teacherZone).toInstant();
+
+            Instant endUtc =
+                    endLocal.atZone(teacherZone).toInstant();
+
+            Session session = Session.builder()
+                    .offering(offering)
+                    .sessionOrder(sessionRequest.getSessionOrder())
+                    .startTimeUtc(startUtc)
+                    .endTimeUtc(endUtc)
+                    .build();
+
+            Session savedSession = sessionRepository.save(session);
+
+            sessionIds.add(savedSession.getId());
+        }
+
+        return sessionIds;
     }
 
     @Override

@@ -8,4 +8,6 @@ import java.util.List;
 public interface SessionRepository extends JpaRepository<Session, Long> {
 
     List<Session> findByOfferingId(Long offeringId);
+
+    List<Session> findByOfferingIdOrderBySessionOrder(Long offeringId);
 }
