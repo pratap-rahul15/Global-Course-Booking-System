@@ -1,0 +1,14 @@
+package com.undoo.booking.repositories;
+
+import com.undoo.booking.entities.Booking;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface BookingRepository extends JpaRepository<Booking, Long> {
+
+    List<Booking> findByParentId(Long parentId);
+
+    boolean existsByParentIdAndOfferingId(Long parentId,
+                                          Long offeringId);
+}
