@@ -1,9 +1,6 @@
 package com.undoo.booking.implementations;
 
-import com.undoo.booking.dtos.AddSessionsRequest;
-import com.undoo.booking.dtos.CreateOfferingRequest;
-import com.undoo.booking.dtos.OfferingResponse;
-import com.undoo.booking.dtos.SessionRequest;
+import com.undoo.booking.dtos.*;
 import com.undoo.booking.entities.*;
 import com.undoo.booking.exceptions.ResourceNotFoundException;
 import com.undoo.booking.repositories.*;
@@ -94,7 +91,7 @@ public class OfferingServiceImpl implements OfferingService {
     }
 
     @Override
-    public List<OfferingResponse> getTeacherOfferings(Long teacherId) {
+    public List<TeacherOfferingResponse> getTeacherOfferings(Long teacherId) {
         return null;
     }
 }
