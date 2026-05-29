@@ -10,4 +10,6 @@ public class SessionInfo {
     private Integer sessionOrder;
     private String startTimeUtc;
     private String endTimeUtc;
+
+
 }

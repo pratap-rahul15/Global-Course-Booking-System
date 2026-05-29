@@ -1,9 +1,6 @@
 package com.undoo.booking.controllers;
 
-import com.undoo.booking.dtos.AddSessionsRequest;
-import com.undoo.booking.dtos.CreateOfferingRequest;
-import com.undoo.booking.dtos.OfferingResponse;
-import com.undoo.booking.dtos.ParentOfferingResponse;
+import com.undoo.booking.dtos.*;
 import com.undoo.booking.services.OfferingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -42,5 +39,12 @@ public class OfferingController {
             @PathVariable Long parentId) {
 
         return offeringService.getAvailableOfferings(parentId);
+    }
+
+    @GetMapping("/teacher/{teacherId}")
+    public List<TeacherOfferingResponse> getTeacherOfferings(
+            @PathVariable Long teacherId) {
+
+        return offeringService.getTeacherOfferings(teacherId);
     }
 }

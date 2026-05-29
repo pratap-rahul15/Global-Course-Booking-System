@@ -104,7 +104,39 @@ public class OfferingServiceImpl implements OfferingService {
 
     @Override
     public List<TeacherOfferingResponse> getTeacherOfferings(Long teacherId) {
-        return null;
+
+        Teacher teacher = teacherRepository.findById(teacherId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Teacher not found"));
+
+        List<Offering> offerings =
+                offeringRepository.findByTeacherId(teacherId);
+
+        return offerings.stream()
+                .map(offering -> {
+
+                    List<SessionInfo> sessions =
+                            sessionRepository
+                                    .findByOfferingIdOrderBySessionOrder(
+                                            offering.getId())
+                                    .stream()
+                                    .map(session ->
+                                            SessionInfo.builder()
+                                                    .sessionOrder(session.getSessionOrder())
+                                                    .startTimeUtc(session.getStartTimeUtc().toString())
+                                                    .endTimeUtc(session.getEndTimeUtc().toString())
+                                                    .build()
+                                    )
+                                    .toList();
+
+                    return TeacherOfferingResponse.builder()
+                            .offeringId(offering.getId())
+                            .title(offering.getTitle())
+                            .courseName(offering.getCourse().getName())
+                            .sessions(sessions)
+                            .build();
+                })
+                .toList();
     }
 
     @Override
